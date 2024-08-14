@@ -15,8 +15,16 @@ app.use(json());
 app.use('/auth', authRoutes);
 app.use('/', urlRoutes);
 
-sequelize.sync().then(() => {
-    app.listen(process.env.PORT, () => {
-        console.log(`Server is running on port ${process.env.PORT}`);
+const startServer = async () => {
+    await sequelize.sync();
+    const port = process.env.PORT || 3000;
+    app.listen(port, () => {
+        console.log(`Server is running on port ${port}`);
     });
-});
+};
+
+if (require.main === module) {
+    startServer();
+}
+
+module.exports = app;

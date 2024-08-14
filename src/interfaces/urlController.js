@@ -2,15 +2,14 @@ const express = require('express');
 const {
     shortenUrl,
     getUrlByShortCode,
-    updateUrl,
-    deleteUrl,
     listUrls
 } = require('../application/services/url');
 const router = express.Router();
+const authenticateJWT = require('../middleware/authJWT');
 
-router.post('/shorten', async (req, res) => {
+router.post('/shorten', authenticateJWT, async (req, res) => {
     try {
-        const userId = req.user ? req.user.id : null;
+        const userId = req.user.id;
         const shortUrl = await shortenUrl(req.body.originalUrl, userId);
         res.json({
             shortUrl: `${req.protocol}://${req.get('host')}/${shortUrl}`
@@ -22,32 +21,10 @@ router.post('/shorten', async (req, res) => {
     }
 });
 
-router.get('/urls', async (req, res) => {
+router.get('/urls', authenticateJWT, async (req, res) => {
     try {
         const urls = await listUrls(req.user.id);
         res.json(urls);
-    } catch (error) {
-        res.status(400).json({
-            error: error.message
-        });
-    }
-});
-
-router.put('/urls/:id', async (req, res) => {
-    try {
-        const url = await updateUrl(req.params.id, req.body.newUrl, req.user.id);
-        res.json(url);
-    } catch (error) {
-        res.status(400).json({
-            error: error.message
-        });
-    }
-});
-
-router.delete('/urls/:id', async (req, res) => {
-    try {
-        const url = await deleteUrl(req.params.id, req.user.id);
-        res.json(url);
     } catch (error) {
         res.status(400).json({
             error: error.message

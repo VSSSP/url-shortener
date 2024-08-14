@@ -1,11 +1,15 @@
 const crypto = require('crypto');
 const Url = require('../../domain/models/url');
+const validator = require('validator');
 
 const generateShortUrl = () => {
     return crypto.randomBytes(3).toString('base64url');
 };
 
 const shortenUrl = async (originalUrl, userId = null) => {
+    if (!validator.isURL(originalUrl)) {
+        throw new Error('Invalid URL');
+    }
     const shortUrl = generateShortUrl();
     const url = await Url.create({
         originalUrl,
@@ -23,31 +27,6 @@ const getUrlByShortCode = async (shortUrl) => {
     });
 };
 
-const updateUrl = async (id, newUrl, userId) => {
-    const url = await Url.findOne({
-        where: {
-            id,
-            UserId: userId
-        }
-    });
-    if (!url) throw new Error('URL not found');
-    url.originalUrl = newUrl;
-    await url.save();
-    return url;
-};
-
-const deleteUrl = async (id, userId) => {
-    const url = await Url.findOne({
-        where: {
-            id,
-            UserId: userId
-        }
-    });
-    if (!url) throw new Error('URL not found');
-    await url.destroy();
-    return url;
-};
-
 const listUrls = async (userId) => {
     return await Url.findAll({
         where: {
@@ -60,7 +39,5 @@ const listUrls = async (userId) => {
 module.exports = {
     shortenUrl,
     getUrlByShortCode,
-    updateUrl,
-    deleteUrl,
     listUrls
 };

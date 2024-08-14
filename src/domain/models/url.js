@@ -31,5 +31,9 @@ const Url = sequelize.define('Url', {
     },
 });
 
-Url.belongsTo(User);
+Url.belongsTo(User, {
+    foreignKey: 'UserID',
+    as: 'User'
+});
+
 module.exports = Url;
